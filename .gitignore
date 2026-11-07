@@ -349,3 +349,14 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 .idea
+
+# Unity shader bundle project
+ShaderProject/Library/
+ShaderProject/Temp/
+ShaderProject/Logs/
+ShaderProject/UserSettings/
+ShaderProject/Build/
+ShaderProject/Assets/CinemaVariants.shadervariants
+ReleaseDir/
+ShaderProject/ProjectSettings/*
+!ShaderProject/ProjectSettings/ProjectVersion.txt

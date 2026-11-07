@@ -1,4 +1,5 @@
-﻿using System;
+using BeatSaber.Settings;
+using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
@@ -414,7 +415,7 @@ namespace BeatSaberCinema
 			SceneChanged();
 		}
 
-		private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO? scenesTransition)
+		private void OnMenuSceneLoadedFresh(ScenesTransitionSetupData? scenesTransition)
 		{
 			OnMenuSceneLoaded();
 			if (_settingsManager == null)
@@ -623,7 +624,7 @@ namespace BeatSaberCinema
 			if (BS_Utils.Plugin.LevelData.IsSet)
 			{
 				//Move to the environment scene to be picked up by Chroma
-				var sceneName = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.targetEnvironmentInfo.sceneInfo.sceneName;
+				var sceneName = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.targetEnvironmentInfo.environmentSceneName;
 				var scene = SceneManager.GetSceneByName(sceneName);
 				SceneManager.MoveGameObjectToScene(gameObject, scene);
 			}

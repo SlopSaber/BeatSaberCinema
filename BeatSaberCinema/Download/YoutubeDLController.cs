@@ -8,8 +8,8 @@ namespace BeatSaberCinema
 {
 	public abstract class YoutubeDLController
 	{
-		private readonly string _youtubeDLFilepath = Path.Combine(UnityGame.LibraryPath, "yt-dlp.exe");
-		private readonly string _ffmpegFilepath = Path.Combine(UnityGame.LibraryPath, "ffmpeg.exe");
+		private readonly string _youtubeDLFilepath = Path.Combine(Path.Combine(UnityGame.ModLibrariesPath, "Cinema"), "yt-dlp.exe");
+		private readonly string _ffmpegFilepath = Path.Combine(Path.Combine(UnityGame.ModLibrariesPath, "Cinema"), "ffmpeg.exe");
 		private readonly string _youtubeDLConfigFilepath = Path.Combine(UnityGame.UserDataPath, "youtube-dl.conf");
 
 		private bool? _librariesAvailable;
@@ -21,7 +21,8 @@ namespace BeatSaberCinema
 				return _librariesAvailable.Value;
 			}
 
-			_librariesAvailable = File.Exists(_youtubeDLFilepath) && File.Exists(_ffmpegFilepath);
+			_librariesAvailable = File.Exists(_youtubeDLFilepath) && File.Exists(_ffmpegFilepath) &&
+			                     File.Exists(Path.Combine(Path.GetDirectoryName(_youtubeDLFilepath), "deno.exe"));
 			return _librariesAvailable.Value;
 		}
 
@@ -84,6 +85,8 @@ namespace BeatSaberCinema
 		{
 			//Use config file in UserData instead of the global yt-dl one
 			arguments += GetConfigFileArgument(_youtubeDLConfigFilepath);
+			arguments += $" --ffmpeg-location \"{Path.GetDirectoryName(_ffmpegFilepath)}\"";
+			arguments += $" --js-runtimes \"deno:{Path.Combine(Path.GetDirectoryName(_youtubeDLFilepath), "deno.exe")}\"";
 
 			var process = new Process
 			{

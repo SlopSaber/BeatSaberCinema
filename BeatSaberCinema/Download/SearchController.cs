@@ -80,7 +80,7 @@ namespace BeatSaberCinema
 
 		private void SearchProcessDataReceived(DataReceivedEventArgs e)
 		{
-			var output = e.Data.Trim();
+			var output = e.Data?.Trim() ?? string.Empty;
 			if (string.IsNullOrWhiteSpace(output))
 			{
 				return;

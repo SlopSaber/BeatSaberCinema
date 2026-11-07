@@ -13,6 +13,14 @@ namespace BeatSaberCinema
 {
 	public static class Util
 	{
+		internal static byte[] GetResource(Assembly assembly, string name)
+		{
+			using var stream = assembly.GetManifestResourceStream(name) ?? throw new FileNotFoundException("Embedded resource not found: " + name);
+			using var buffer = new MemoryStream();
+			stream.CopyTo(buffer);
+			return buffer.ToArray();
+		}
+
 		public static bool IsFileLocked(FileInfo file)
 		{
 			try
@@ -81,7 +89,7 @@ namespace BeatSaberCinema
 
 		public static Texture? LoadPNGFromResources(string resourcePath)
 		{
-			var fileData = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), resourcePath);
+			var fileData = Util.GetResource(Assembly.GetExecutingAssembly(), resourcePath);
 			if (fileData.Length <= 0)
 			{
 				return null;

@@ -378,12 +378,16 @@ namespace BeatSaberCinema
 			return videoConfig ?? GetConfigFromBundledConfigs(level);
 		}
 
-		[Obsolete("Obsolete")]
 		public static string GetLevelPath(BeatmapLevel level)
 		{
 			if (!level.hasPrecalculatedData)
 			{
-				return Collections.GetCustomLevelPath(level.levelID);
+				if (Loader.CustomLevelLoader._loadedBeatmapSaveData.TryGetValue(level.levelID, out var saveData))
+				{
+					return saveData.customLevelFolderInfo.folderPath;
+				}
+				var entry = Loader.CustomLevels.Concat(Loader.CustomWIPLevels).FirstOrDefault(pair => pair.Value.levelID == level.levelID);
+				return entry.Key ?? throw new InvalidOperationException("Custom level folder not found: " + level.levelID);
 			}
 
 			var songName = level.songName.Trim();
@@ -546,7 +550,7 @@ namespace BeatSaberCinema
 
 		private static IEnumerable<BundledConfig> LoadBundledConfigs()
 		{
-			var buffer = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
+			var buffer = Util.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.configs.json");
 			var jsonString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 			var configs = JsonConvert.DeserializeObject<BundledConfig[]>(jsonString);
 			if (configs == null)

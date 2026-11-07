@@ -164,34 +164,26 @@ namespace BeatSaberCinema
 			SetDefaultMenuPlacement();
 		}
 
-		private static Shader GetShader(string? path = null)
+		private static readonly System.Collections.Generic.Dictionary<string, Shader> Shaders = new System.Collections.Generic.Dictionary<string, Shader>();
+
+		internal static Shader GetShader(string? path = null, string assetName = "VideoShader")
 		{
-			AssetBundle myLoadedAssetBundle;
-			if (path == null)
+			if (path == null && Shaders.TryGetValue(assetName, out var cached) && cached != null) return cached;
+			var bundle = path == null
+				? AssetBundle.LoadFromMemory(Util.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle"))
+				: AssetBundle.LoadFromFile(path);
+			if (bundle == null) throw new InvalidOperationException("Cinema shader bundle could not be loaded.");
+			try
 			{
-				var bundle = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "BeatSaberCinema.Resources.bscinema.bundle");
-				if (bundle == null || bundle.Length == 0)
-				{
-					Log.Error("GetResource failed");
-					return Shader.Find("Hidden/BlitAdd");
-				}
-
-				myLoadedAssetBundle = AssetBundle.LoadFromMemory(bundle);
-				if (myLoadedAssetBundle == null)
-				{
-					Log.Error("LoadFromMemory failed");
-					return Shader.Find("Hidden/BlitAdd");
-				}
+				var shader = bundle.LoadAsset<Shader>(assetName);
+				if (shader == null || !shader.isSupported) throw new InvalidOperationException("Cinema shader is unavailable: " + assetName);
+				if (path == null) Shaders[assetName] = shader;
+				return shader;
 			}
-			else
+			finally
 			{
-				myLoadedAssetBundle = AssetBundle.LoadFromFile(path);
+				bundle.Unload(false);
 			}
-
-			var shader = myLoadedAssetBundle.LoadAsset<Shader>("VideoShader");
-			myLoadedAssetBundle.Unload(false);
-
-			return shader;
 		}
 
 		public void FadeControllerUpdate(float value)

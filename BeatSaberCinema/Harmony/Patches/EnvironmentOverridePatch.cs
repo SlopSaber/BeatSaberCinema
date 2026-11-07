@@ -10,11 +10,9 @@ namespace BeatSaberCinema.Patches
 	[HarmonyPatch]
 	[UsedImplicitly]
 	// ReSharper disable once InconsistentNaming
-	internal static class StandardLevelScenesTransitionSetupDataSOInit
+	internal static class StandardLevelScenesTransitionSetupDataInit
 	{
-		private static MethodInfo TargetMethod() => AccessTools.FirstMethod(typeof(StandardLevelScenesTransitionSetupDataSO),
-			m => m.Name == nameof(StandardLevelScenesTransitionSetupDataSO.Init) &&
-			     m.GetParameters().All(p => p.ParameterType != typeof(IBeatmapLevelData)));
+		private static MethodInfo TargetMethod() => AccessTools.DeclaredMethod(typeof(StandardLevelScenesTransitionSetupData), nameof(StandardLevelScenesTransitionSetupData.Init));
 
 		[UsedImplicitly]
 		public static void Prefix(BeatmapLevel beatmapLevel, BeatmapKey beatmapKey, ref OverrideEnvironmentSettings overrideEnvironmentSettings)
@@ -84,7 +82,7 @@ namespace BeatSaberCinema.Patches
 					"LizzoEnvironment",
 				};
 
-				var environmentName = beatmapLevel.GetEnvironmentName(beatmapKey.beatmapCharacteristic, beatmapKey.difficulty);
+				var environmentName = beatmapLevel.GetEnvironmentName(beatmapKey);
 				// Kind of ugly way to get the EnvironmentsListModel but it's either that or changing both patches.
 				var customLevelLoader = (CustomLevelLoader)VideoLoader.BeatmapLevelsModel._customLevelLoader;
 				var mapEnvironmentInfoSo = customLevelLoader._environmentsListModel.GetEnvironmentInfoBySerializedNameSafe(environmentName);
@@ -143,11 +141,9 @@ namespace BeatSaberCinema.Patches
 	[HarmonyPatch]
 	[UsedImplicitly]
 	// ReSharper disable once InconsistentNaming
-	internal static class MissionLevelScenesTransitionSetupDataSOInit
+	internal static class MissionLevelScenesTransitionSetupDataInit
 	{
-		private static MethodInfo TargetMethod() => AccessTools.FirstMethod(typeof(MissionLevelScenesTransitionSetupDataSO),
-			m => m.Name == nameof(MissionLevelScenesTransitionSetupDataSO.Init) &&
-			     m.GetParameters().All(p => p.ParameterType != typeof(IBeatmapLevelData)));
+		private static MethodInfo TargetMethod() => AccessTools.DeclaredMethod(typeof(MissionLevelScenesTransitionSetupData), nameof(MissionLevelScenesTransitionSetupData.Init));
 
 		[UsedImplicitly]
 		private static void Prefix(BeatmapLevel beatmapLevel, BeatmapKey beatmapKey)
@@ -155,7 +151,7 @@ namespace BeatSaberCinema.Patches
 			try
 			{
 				var overrideSettings = new OverrideEnvironmentSettings();
-				StandardLevelScenesTransitionSetupDataSOInit.Prefix(beatmapLevel, beatmapKey, ref overrideSettings);
+				StandardLevelScenesTransitionSetupDataInit.Prefix(beatmapLevel, beatmapKey, ref overrideSettings);
 			}
 			catch (Exception e)
 			{

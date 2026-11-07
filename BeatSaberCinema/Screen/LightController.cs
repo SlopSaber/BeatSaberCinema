@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -128,7 +128,7 @@ namespace BeatSaberCinema
 			_light.intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
 		}
 
-		private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransitionSetupDataSo)
+		private void OnMenuSceneLoadedFresh(ScenesTransitionSetupData scenesTransitionSetupDataSo)
 		{
 			try
 			{

@@ -8,7 +8,7 @@ A Beat Saber plugin that allows you to sync up videos to play in the background 
 
 The simplest way to install Cinema is to download it from ModAssistant.
 
-If you want to install Cinema manually, download the latest release [from here](https://github.com/Kevga/BeatSaberCinema/releases/latest) and simply unzip all of it's contents into the Beat Saber folder. Make sure you don't skip the files in the Libs folder, as those are required, too.
+If you want to install Cinema manually, download the latest release [from here](https://github.com/Kevga/BeatSaberCinema/releases/latest) and simply unzip all of it's contents into the Beat Saber folder. For Beat Saber 1.45.3, copy the complete `Mods` folder into the game folder, including `Mods/Libraries/Cinema`. This contains yt-dlp, FFmpeg, and Deno, which are required for video downloads.
 
 Additionally, the following plugins are **required** for Cinema to work:
 
@@ -348,3 +348,16 @@ which are used to download and convert the videos for playback in-game
 
 - [JetBrains](https://jb.gg/OpenSource),
 for supporting this project by providing a license for their dev tools
+
+
+## Building for Beat Saber 1.45.3
+
+The plugin targets .NET Framework 4.8 and BSIPA 5. Supply `GameDirectory` explicitly when building. Unity 6000.3.19f1 builds the video and screen-body shader bundle from the separate `ShaderProject` project:
+
+```powershell
+& '<Unity editor>/Unity.exe' -batchmode -nographics -quit -projectPath "$PWD/ShaderProject" -executeMethod BuildShaders.Build -logFile "$PWD/shader-build.log"
+dotnet build BeatSaberCinema/BeatSaberCinema.csproj -c Release '-p:GameDirectory=<game folder>' -p:DisableCopyToPlugins=true -p:DisableZipRelease=true
+./Prepare-Dependencies.ps1 -ArtifactDirectory BeatSaberCinema/bin/Release/Artifact
+```
+
+The complete installation output is `BeatSaberCinema/bin/Release/Artifact/Mods`. `Prepare-Dependencies.ps1` downloads the latest stable Windows x64 tool releases and records their versions, sources, and SHA-256 hashes in `tools.json`. Runtime settings and map video configurations keep their existing formats.

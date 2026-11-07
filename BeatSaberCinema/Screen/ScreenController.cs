@@ -23,7 +23,7 @@ namespace BeatSaberCinema
 		private static readonly int DestColor = Shader.PropertyToID("_DestColor");
 		private static readonly int SrcAlpha = Shader.PropertyToID("_SrcAlpha");
 		private static readonly int DestAlpha = Shader.PropertyToID("_DestAlpha");
-		private const string BODY_SHADER_NAME = "Custom/OpaqueNeonLight";
+		private const string BODY_SHADER_NAME = "Cinema/ScreenBody";
 
 		public ScreenController()
 		{
@@ -75,25 +75,7 @@ namespace BeatSaberCinema
 
 		private static void AssignBodyMaterial(Renderer bodyRenderer)
 		{
-			var bodyShader = Resources.FindObjectsOfTypeAll<Shader>().LastOrDefault(x => x.name == BODY_SHADER_NAME);
-			if (bodyShader != null)
-			{
-				bodyRenderer.material = new Material(bodyShader);
-				Log.Debug("Assigned body shader: "+bodyShader.name);
-			}
-			else
-			{
-				var shader = Shader.Find(BODY_SHADER_NAME);
-				if (shader != null)
-				{
-					bodyRenderer.material = new Material(shader);
-					Log.Debug("Assigned body shader: "+shader.name);
-				}
-				else
-				{
-					Log.Error("Could not find body shader");
-				}
-			}
+			bodyRenderer.material = new Material(CustomVideoPlayer.GetShader(assetName: "ScreenBody"));
 
 			bodyRenderer.material.color = new Color(0, 0, 0, 0);
 		}

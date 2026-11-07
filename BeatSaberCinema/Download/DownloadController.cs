@@ -102,8 +102,8 @@ namespace BeatSaberCinema
 
 		private void DownloadErrorDataReceived(DataReceivedEventArgs eventArgs, VideoConfig video)
 		{
-			var error = eventArgs.Data.Trim();
-			if (error.Length == 0)
+			var error = eventArgs.Data?.Trim() ?? string.Empty;
+			if (string.IsNullOrEmpty(error))
 			{
 				return;
 			}

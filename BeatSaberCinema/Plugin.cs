@@ -47,7 +47,7 @@ namespace BeatSaberCinema
 			VideoLoader.Init();
 		}
 
-		private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
+		private static void OnMenuSceneLoadedFresh(ScenesTransitionSetupData scenesTransition)
 		{
 			PlaybackController.Create();
 
@@ -67,6 +67,7 @@ namespace BeatSaberCinema
 		public void OnEnable()
 		{
 			Enabled = true;
+			ScreenShaderKeywords.Enable();
 			BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 			_harmonyPatchController = new HarmonyPatchController();
 			ApplyHarmonyPatches();
@@ -89,6 +90,7 @@ namespace BeatSaberCinema
 		public void OnDisable()
 		{
 			Enabled = false;
+			ScreenShaderKeywords.Disable();
 			BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
 			Loader.SongsLoadedEvent -= VideoLoader.IndexMaps;
 			RemoveHarmonyPatches();

@@ -4,13 +4,13 @@
 	"name": "Cinema",
 	"description": "Play videos in the background of your beatmaps",
 	"author": "Dakari",
-	"gameVersion": "1.38.0",
+	"gameVersion": "1.45.3",
 	"version": "1.7.12",
 	"dependsOn": {
-		"BSIPA": "^4.3.4",
-		"BeatSaberMarkupLanguage": "^1.11.2",
-		"BS Utils": "^1.14.0",
-		"SongCore": "^3.14.5"
+		"BSIPA": "^5.0.0",
+		"BeatSaberMarkupLanguage": "^1.14.2",
+		"BS Utils": "^1.14.4",
+		"SongCore": "^3.16.0"
 	},
 	"links": {
 		"project-source": "https://github.com/Kevga/BeatSaberCinema",
