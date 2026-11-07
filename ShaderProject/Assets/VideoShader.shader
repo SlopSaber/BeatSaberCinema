@@ -35,7 +35,7 @@ Shader "VideoShader"
             #define UNITY_SINGLE_PASS_STEREO
         #endif
         #include "UnityCG.cginc"
-        sampler2D _MainTex;
+        sampler2D _CinemaVideoTexture;
         float4 _MainTex_ST, _Color;
         float _Hue, _Brightness, _Contrast, _Saturation, _Exposure, _Gamma;
         float _VignetteRadius, _VignetteSoftness, _VignetteOval, _BloomStrength;
@@ -64,7 +64,7 @@ Shader "VideoShader"
         }
         float4 VideoColor(float2 uv)
         {
-            float3 color = tex2D(_MainTex, uv).rgb;
+            float3 color = tex2D(_CinemaVideoTexture, uv).rgb;
             float angle = radians(_Hue);
             float3 axis = normalize(float3(1,1,1));
             color = color * cos(angle) + cross(axis, color) * sin(angle) + axis * dot(axis, color) * (1 - cos(angle));

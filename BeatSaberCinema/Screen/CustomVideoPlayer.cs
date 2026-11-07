@@ -233,6 +233,7 @@ namespace BeatSaberCinema
 			//If we set the white color when calling Play(), a few frames of white screen are still visible.
 			//So, we wait before the player renders its first frame and then set the color, making the switch invisible.
 			FadeIn();
+			Log.Info($"First video frame {frame}: screen active={_screenRenderer.gameObject.activeInHierarchy}, renderer enabled={_screenRenderer.enabled}, layer={_screenRenderer.gameObject.layer}, position={_screenRenderer.transform.position}, shader={_screenRenderer.sharedMaterial.shader.name}.");
 			_firstFrameStopwatch.Stop();
 			Log.Debug("Delay from Play() to first frame: "+_firstFrameStopwatch.ElapsedMilliseconds+" ms");
 			_firstFrameStopwatch.Reset();
@@ -401,9 +402,7 @@ namespace BeatSaberCinema
 
 		private static void VideoPlayerPrepareComplete(VideoPlayer source)
 		{
-			Log.Debug("Video player prepare complete");
-			var texture = source.texture;
-			Log.Debug($"Video resolution: {texture.width}x{texture.height}");
+			Log.Info($"Video prepared: {source.width}x{source.height}, duration {source.length:0.00}s.");
 		}
 
 		private void VideoPlayerStarted(VideoPlayer source)
