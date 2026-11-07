@@ -58,8 +58,8 @@ namespace BeatSaberCinema
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown in '{eventName}' handler '{handler.Method.Name}': {ex.Message}");
-					Log.Debug(ex);
+					Log.Error($"Exception thrown in '{eventName}' handler '{handler.Method.DeclaringType?.FullName}.{handler.Method.Name}': {ex.Message}");
+					Log.Error(ex);
 				}
 			}
 		}

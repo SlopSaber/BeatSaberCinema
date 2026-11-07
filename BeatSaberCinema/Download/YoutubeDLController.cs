@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using IPA.Utilities;
 
@@ -8,23 +9,22 @@ namespace BeatSaberCinema
 {
 	public abstract class YoutubeDLController
 	{
-		private readonly string _youtubeDLFilepath = Path.Combine(Path.Combine(UnityGame.ModLibrariesPath, "Cinema"), "yt-dlp.exe");
-		private readonly string _ffmpegFilepath = Path.Combine(Path.Combine(UnityGame.ModLibrariesPath, "Cinema"), "ffmpeg.exe");
+		private readonly string _youtubeDLFilepath = FindTool("yt-dlp.exe");
+		private readonly string _ffmpegFilepath = FindTool("ffmpeg.exe");
+		private readonly string _denoFilepath = FindTool("deno.exe");
 		private readonly string _youtubeDLConfigFilepath = Path.Combine(UnityGame.UserDataPath, "youtube-dl.conf");
 
-		private bool? _librariesAvailable;
-
-		public bool LibrariesAvailable()
+		private static string FindTool(string name)
 		{
-			if (_librariesAvailable != null)
-			{
-				return _librariesAvailable.Value;
-			}
-
-			_librariesAvailable = File.Exists(_youtubeDLFilepath) && File.Exists(_ffmpegFilepath) &&
-			                     File.Exists(Path.Combine(Path.GetDirectoryName(_youtubeDLFilepath), "deno.exe"));
-			return _librariesAvailable.Value;
+			var canonical = Path.Combine(UnityGame.ModLibrariesPath, name);
+			var nested = Path.Combine(UnityGame.ModLibrariesPath, "Cinema", name);
+			return File.Exists(canonical) || !File.Exists(nested) ? canonical : nested;
 		}
+
+		public string MissingLibraries => string.Join(", ", new[] { _youtubeDLFilepath, _ffmpegFilepath, _denoFilepath }
+			.Where(path => !File.Exists(path)).Select(Path.GetFileName));
+
+		public bool LibrariesAvailable() => string.IsNullOrEmpty(MissingLibraries);
 
 		private static string GetConfigFileArgument(string path)
 		{
@@ -86,7 +86,7 @@ namespace BeatSaberCinema
 			//Use config file in UserData instead of the global yt-dl one
 			arguments += GetConfigFileArgument(_youtubeDLConfigFilepath);
 			arguments += $" --ffmpeg-location \"{Path.GetDirectoryName(_ffmpegFilepath)}\"";
-			arguments += $" --js-runtimes \"deno:{Path.Combine(Path.GetDirectoryName(_youtubeDLFilepath), "deno.exe")}\"";
+			arguments += $" --js-runtimes \"deno:{_denoFilepath}\"";
 
 			var process = new Process
 			{

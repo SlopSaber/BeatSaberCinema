@@ -8,7 +8,7 @@ A Beat Saber plugin that allows you to sync up videos to play in the background 
 
 The simplest way to install Cinema is to download it from ModAssistant.
 
-If you want to install Cinema manually, download the latest release [from here](https://github.com/Kevga/BeatSaberCinema/releases/latest) and simply unzip all of it's contents into the Beat Saber folder. For Beat Saber 1.45.3, copy the complete `Mods` folder into the game folder, including `Mods/Libraries/Cinema`. This contains yt-dlp, FFmpeg, and Deno, which are required for video downloads.
+If you want to install Cinema manually, download the latest release [from here](https://github.com/Kevga/BeatSaberCinema/releases/latest) and simply unzip all of it's contents into the Beat Saber folder. For Beat Saber 1.45.3, copy the complete `Mods` folder into the game folder, including `Mods/Libraries`. This contains yt-dlp, FFmpeg, and Deno, which are required for video downloads.
 
 Additionally, the following plugins are **required** for Cinema to work:
 

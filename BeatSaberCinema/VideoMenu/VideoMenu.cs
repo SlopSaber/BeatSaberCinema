@@ -73,6 +73,8 @@ namespace BeatSaberCinema
 		private VideoMenuStatus _menuStatus = null!;
 		private LevelDetailViewController? _levelDetailMenu;
 		private bool _videoMenuInitialized;
+		private LevelSelectedArgs? _pendingSelection;
+		private Coroutine? _pendingSelectionCoroutine;
 
 		private BeatmapLevel? _currentLevel;
 		private bool _currentLevelIsPlaylistSong;
@@ -89,6 +91,16 @@ namespace BeatSaberCinema
 
 		public static VideoMenu? Instance { get; private set; }
 
+		[UIAction("#post-parse")]
+		private void OnParsed()
+		{
+			Init();
+			_videoMenuActive = _root.activeInHierarchy;
+			_pendingSelection ??= new LevelSelectedArgs(_currentLevel);
+			ApplyPendingSelection();
+			if (PlaybackController.Instance != null && PlaybackController.Instance.VideoPlayer != null) SetupVideoDetails();
+		}
+
 		public void Init()
 		{
 			Events.LevelSelected -= OnLevelSelected;
@@ -101,6 +113,7 @@ namespace BeatSaberCinema
 				Log.Debug("RootObject is null!");
 				return;
 			}
+			if (_videoMenuInitialized) return;
 
 			if (_levelDetailMenu != null)
 			{
@@ -114,11 +127,6 @@ namespace BeatSaberCinema
 
 			_searchKeyboard.ClearOnOpen = false;
 
-			if (_videoMenuInitialized)
-			{
-				return;
-			}
-
 			_videoMenuInitialized = true;
 			_videoDetailsViewRect.gameObject.SetActive(false);
 			_videoSearchResultsViewRect.gameObject.SetActive(false);
@@ -131,7 +139,7 @@ namespace BeatSaberCinema
 
 			if (!_downloadController.LibrariesAvailable())
 			{
-				Log.Warn($"One or more of the libraries are missing. Downloading videos will not work. To fix this, reinstall Cinema and make sure yt-dlp and ffmpeg are in the Libs folder of Beat Saber, which is located at {UnityGame.LibraryPath}.");
+				Log.Warn($"Missing download tools: {_downloadController.MissingLibraries}. Install the complete Cinema package, including Mods/Libraries ({UnityGame.ModLibrariesPath}).");
 			}
 		}
 
@@ -167,6 +175,12 @@ namespace BeatSaberCinema
 		public static void RemoveTab()
 		{
 			Log.Debug("Removing tab");
+			if (Instance != null)
+			{
+				Events.LevelSelected -= Instance.OnLevelSelected;
+				Events.DifficultySelected -= Instance.OnDifficultySelected;
+				VideoLoader.ConfigChanged -= Instance.OnConfigChanged;
+			}
 			GameplaySetup.Instance.RemoveTab("Cinema");
 			Instance = null;
 		}
@@ -180,7 +194,7 @@ namespace BeatSaberCinema
 
 			if (!_downloadController.LibrariesAvailable())
 			{
-				_noVideoText.text = "Libraries not found. Please reinstall Cinema.\r\nMake sure you unzip the files from the Libs folder into 'Beat Saber\\Libs'.";
+				_noVideoText.text = $"Missing download tools: {_downloadController.MissingLibraries}.\r\nReinstall the complete Cinema package, including Mods/Libraries.";
 				_searchButton.gameObject.SetActive(false);
 				return;
 			}
@@ -274,9 +288,8 @@ namespace BeatSaberCinema
 
 		public void SetupVideoDetails()
 		{
-			if (_videoSearchResultsViewRect == null)
+			if (!_videoMenuInitialized || _videoSearchResultsViewRect == null)
 			{
-				Log.Warn("Video search results view rect is null, skipping UI setup");
 				return;
 			}
 
@@ -539,6 +552,11 @@ namespace BeatSaberCinema
 
 		public void HandleDidSelectLevel(BeatmapLevel? level)
 		{
+			if (PlaybackController.Instance == null || PlaybackController.Instance.VideoPlayer == null)
+			{
+				OnLevelSelected(new LevelSelectedArgs(level));
+				return;
+			}
 			//These will be set a bit later by a Harmony patch. Clear them to not accidentally access outdated info.
 			_extraSongData = null;
 			_difficultyData = null;
@@ -580,11 +598,26 @@ namespace BeatSaberCinema
 
 		private void OnLevelSelected(LevelSelectedArgs levelSelectedArgs)
 		{
+			_pendingSelection = levelSelectedArgs;
 			if (!_videoMenuInitialized)
 			{
 				Log.Debug("Initializing video menu (late)");
 				Init();
 			}
+			ApplyPendingSelection();
+		}
+
+		private void ApplyPendingSelection()
+		{
+			if (_pendingSelection == null) return;
+			if (PlaybackController.Instance == null || PlaybackController.Instance.VideoPlayer == null)
+			{
+				if (_pendingSelectionCoroutine == null)
+					_pendingSelectionCoroutine = CoroutineStarter.Instance.StartCoroutine(WaitForPlaybackController());
+				return;
+			}
+			var levelSelectedArgs = _pendingSelection;
+			_pendingSelection = null;
 
 			if (levelSelectedArgs.BeatmapData != null)
 			{
@@ -593,6 +626,16 @@ namespace BeatSaberCinema
 			}
 
 			HandleDidSelectLevel(levelSelectedArgs.BeatmapLevel);
+		}
+
+		private IEnumerator WaitForPlaybackController()
+		{
+			do
+			{
+				yield return null;
+			} while (Instance == this && (PlaybackController.Instance == null || PlaybackController.Instance.VideoPlayer == null));
+			_pendingSelectionCoroutine = null;
+			if (Instance == this) ApplyPendingSelection();
 		}
 
 		private void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs)
@@ -614,6 +657,11 @@ namespace BeatSaberCinema
 		public void StatusViewerDidEnable(object sender, EventArgs e)
 		{
 			_videoMenuActive = true;
+			if (PlaybackController.Instance == null || PlaybackController.Instance.VideoPlayer == null)
+			{
+				OnLevelSelected(_pendingSelection ?? new LevelSelectedArgs(_currentLevel));
+				return;
+			}
 			PlaybackController.Instance.StopPreview(false);
 			SetupVideoDetails();
 		}
@@ -1004,21 +1052,21 @@ namespace BeatSaberCinema
 
 	public class VideoMenuStatus : MonoBehaviour
 	{
-		public event EventHandler DidEnable = null!;
-		public event EventHandler DidDisable = null!;
+		public event EventHandler? DidEnable;
+		public event EventHandler? DidDisable;
 
 		private void OnEnable()
 		{
 			var handler = DidEnable;
 
-			handler.Invoke(this, EventArgs.Empty);
+			handler?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnDisable()
 		{
 			var handler = DidDisable;
 
-			handler.Invoke(this, EventArgs.Empty);
+			handler?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }

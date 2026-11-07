@@ -2,7 +2,7 @@
 param([Parameter(Mandatory = $true)][string]$ArtifactDirectory)
 
 $ErrorActionPreference = 'Stop'
-$destination = Join-Path ([IO.Path]::GetFullPath($ArtifactDirectory)) 'Mods/Libraries/Cinema'
+$destination = Join-Path ([IO.Path]::GetFullPath($ArtifactDirectory)) 'Mods/Libraries'
 $cache = Join-Path $PSScriptRoot 'BeatSaberCinema/obj/CinemaDownloads'
 [IO.Directory]::CreateDirectory($destination) | Out-Null
 [IO.Directory]::CreateDirectory($cache) | Out-Null
